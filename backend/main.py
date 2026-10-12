@@ -34,13 +34,22 @@ ALLOWED_MIME_TYPES = {
 
 @app.get("/api/health")
 async def health_check():
-    import torch
+    gpu_available = False
+    device_name = "CPU"
+    try:
+        import torch
+        if torch.cuda.is_available():
+            gpu_available = True
+            device_name = torch.cuda.get_device_name(0)
+    except Exception:
+        pass
+
     return {
         "status": "healthy",
         "service": "Image Match Engine",
         "timestamp": time.time(),
-        "gpu_available": torch.cuda.is_available(),
-        "device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
+        "gpu_available": gpu_available,
+        "device": device_name
     }
 
 @app.get("/api/samples")

@@ -3,9 +3,16 @@ import base64
 import numpy as np
 import cv2
 from PIL import Image, ImageOps
-import torch
-import torchvision.transforms as transforms
-import torchvision.models as models
+try:
+    import torch
+    import torchvision.transforms as transforms
+    import torchvision.models as models
+    HAS_TORCH = True
+except ImportError:
+    torch = None
+    transforms = None
+    models = None
+    HAS_TORCH = False
 
 # Initialize optional deep feature extractor
 _deep_model = None
@@ -13,6 +20,8 @@ _deep_transform = None
 
 def get_deep_feature_extractor():
     global _deep_model, _deep_transform
+    if not HAS_TORCH:
+        return None
     if _deep_model is None:
         try:
             # Using lightweight MobileNetV2 for fast inference
